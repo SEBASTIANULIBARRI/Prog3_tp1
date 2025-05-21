@@ -30,9 +30,12 @@ public class Arco<T> implements Comparable<T>{
 		return Objects.hash(verticeOrigen, verticeDestino);
 	}
 
-	@Override
 
-	
+	@Override
+	public int compareTo(T o) {
+		return 0;
+	}
+
 	public int getVerticeOrigen() {
 		return verticeOrigen;
 	}

@@ -10,18 +10,31 @@ public class Main {
 		// Agrego los vertices 1 y 2
 		grafito.agregarVertice(1);
 		grafito.agregarVertice(2);
+		grafito.agregarVertice(3);
+		grafito.agregarVertice(4);
+		grafito.agregarVertice(5);
 
 		// Genero un arco desde 1 hasta 2 con el valor de etiqueta 3
-		//grafito.agregarArco(1, 2, 3F);
+		grafito.agregarArco(1, 2, 3F);
 		
 		// Obtengo el arco entre 1 y 2, y le pido la etiqueta
-		//Float etiqueta = grafito.obtenerArco(1, 2).getEtiqueta();
 
 		Iterator<Integer> it = grafito.obtenerVertices();
 		while (it.hasNext()) {
 			Integer i = it.next();
 			System.out.println(i);
 		}
+
+		Iterator<Integer> it1 = grafito.obtenerAdyacentes(1);
+		while (it1.hasNext()) {
+			Integer i = it1.next();
+			System.out.println(i);
+		}
+		Float etiqueta = grafito.obtenerArco(1, 2).getEtiqueta();
+
+		System.out.println(etiqueta);
+
+
 	}
 
 }
