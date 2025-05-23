@@ -3,7 +3,8 @@ import java.util.*;
 
 public class GrafoDirigido<T> implements Grafo<T> {
 
-    private HashMap<Integer, List<Arco<T>>> grafo = new HashMap<>();
+    private LinkedHashMap<Integer, List<Arco<T>>> grafo = new LinkedHashMap<>();
+
 
     @Override
     public void agregarVertice(int verticeId) {
@@ -86,6 +87,7 @@ public class GrafoDirigido<T> implements Grafo<T> {
         return count;
     }
 
+
     @Override
     public Iterator<Integer> obtenerVertices() {
         // TODO Auto-generated method stub
@@ -165,18 +167,147 @@ public class GrafoDirigido<T> implements Grafo<T> {
         //Tomo el primer vertice
         Iterator<Integer> it1 = obtenerVertices();
         if (it1 == null) return;
+        Map<Integer, Boolean> visitados = new HashMap<>();
+        while (it1.hasNext()) {
+            int v = it1.next();
+            visitados.put(v, false);
+        }
+        it1 = obtenerVertices();
+
+        Queue<Integer> fila = new LinkedList<>();
         while (it1.hasNext()) {
             Integer i = it1.next();
-            
-            Queue<Integer> fila = new LinkedList<>();
-            fila.add(i);
+            if (!visitados.get(i)) {
+                fila.add(i);
+                visitados.put(i, true);
+            }
             while (!fila.isEmpty()) {
                 Integer first = fila.poll();
+                System.out.println("Visitando: " + first);
+                Iterator<Integer> itAdy = obtenerAdyacentes(first);
+                while (itAdy.hasNext()) {
+                    Integer ady = itAdy.next();
+                    if (!visitados.getOrDefault(ady, true)) {
+                        fila.add(ady);
+                        visitados.put(ady, true);
+                    }
+                }
 
             }
         }
+    }
 
+    public boolean tieneCiclos() {
+        Map<Integer, String> visitados = new HashMap<>();
+        Iterator<Integer> it1 = obtenerVertices();
+        while (it1.hasNext()) {
+            int v = it1.next();
+            visitados.put(v, "Blanco");
+        }
+
+        it1 = obtenerVertices(); // reiniciar iterador
+        Boolean encontreCiclo = false;
+        while (it1.hasNext() && !encontreCiclo) {
+            int v = it1.next();
+            if (visitados.get(v).equals("Blanco")) {
+                encontreCiclo = ciclosRecursivo(v, visitados);
+            }
+        }
+        return encontreCiclo;
 
     }
 
+    private boolean ciclosRecursivo(Integer v, Map<Integer, String> visitados) {
+        System.out.println("pase por " + v);
+        visitados.put(v, "Gris");
+        Iterator<Integer> it1 = obtenerAdyacentes(v);
+        while (it1.hasNext()) {
+            Integer i = it1.next();
+            if (visitados.get(i).equals("Blanco")) return ciclosRecursivo(i, visitados);
+            if (visitados.get(i).equals("Gris")) return true;
+
+        }
+        visitados.put(v, "Negro");
+        return false;
+    }
+
+    public List<Integer> caminoMasLargo(int v1, int v2) {
+        Map<Integer, Boolean> visitados = new HashMap<>();
+        Iterator<Integer> it1 = obtenerVertices();
+        while (it1.hasNext()) {
+            int v = it1.next();
+            visitados.put(v, false);
+        }
+
+        List<Integer> solParcial = new ArrayList<>();
+        List<Integer> mejorSolucion = new ArrayList<>();
+
+        solParcial.add(v1);
+
+        visitados.put(v1, true);
+        caminoMasLargoRecursivo(v1, v2, solParcial, mejorSolucion, visitados);
+        return mejorSolucion;
+    }
+    private void caminoMasLargoRecursivo(int vActual, int vDestino, List<Integer> solucionParcial, List<Integer> mejorSolucion, Map<Integer, Boolean> visitados) {
+        if (vActual == vDestino) {
+            if (solucionParcial.size() > mejorSolucion.size()) {
+                mejorSolucion.clear();
+                mejorSolucion.addAll(solucionParcial); // copiar contenido
+            }
+        } else {
+            Iterator<Integer> it1 = obtenerAdyacentes(vActual);
+            while (it1.hasNext()) {
+                Integer vertice = it1.next();
+                if (!visitados.getOrDefault(vertice, false)) {
+                    visitados.put(vertice, true);
+                    solucionParcial.add(vertice);
+
+                    caminoMasLargoRecursivo(vertice, vDestino, solucionParcial, mejorSolucion, visitados);
+
+                    solucionParcial.remove(solucionParcial.size() - 1); // backtrack
+                    visitados.put(vertice, false); // backtrack
+                }
+            }
+        }
+    }
+    public List<Integer> caminoMasCorto(int v1, int v2) {
+        Map<Integer, Boolean> visitados = new HashMap<>();
+        Iterator<Integer> it1 = obtenerVertices();
+        while (it1.hasNext()) {
+            int v = it1.next();
+            visitados.put(v, false);
+        }
+
+        List<Integer> solParcial = new ArrayList<>();
+        List<Integer> mejorSolucion = new ArrayList<>();
+
+        solParcial.add(v1);
+
+        visitados.put(v1, true);
+        caminoMasCortoRecursivo(v1, v2, solParcial, mejorSolucion, visitados);
+        return mejorSolucion;
+    }
+
+    private void caminoMasCortoRecursivo(int vActual, int vDestino, List<Integer> solucionParcial, List<Integer> mejorSolucion, Map<Integer, Boolean> visitados) {
+        if (vActual == vDestino) {
+            if (solucionParcial.size() < mejorSolucion.size() || mejorSolucion.isEmpty()) {
+                mejorSolucion.clear();
+                mejorSolucion.addAll(solucionParcial); // copiar contenido
+            }
+        } else {
+            Iterator<Integer> it1 = obtenerAdyacentes(vActual);
+            while (it1.hasNext()) {
+                Integer vertice = it1.next();
+                if (!visitados.getOrDefault(vertice, false)) {
+                    visitados.put(vertice, true);
+                    solucionParcial.add(vertice);
+
+                    caminoMasCortoRecursivo(vertice, vDestino, solucionParcial, mejorSolucion, visitados);
+
+                    solucionParcial.remove(solucionParcial.size() - 1); // backtrack
+                    visitados.put(vertice, false); // backtrack
+                }
+            }
+        }
+    }
 }
